@@ -54,15 +54,15 @@ contract Caave is BaseStrategy {
 
     //Convex contracts
     // this is the deposit contract that all pools use, aka booster
-    IConvexDeposit public depositContract = IConvexDeposit(0xF403C135812408BFbE8713b5A23a04b3D48AAE31); 
+    IConvexDeposit public constant depositContract = IConvexDeposit(0xF403C135812408BFbE8713b5A23a04b3D48AAE31); 
      // This is unique to each curve pool, this one is for 3Crypto
-    IConvexRewards public rewardsContract = IConvexRewards(0x9D5C5E364D81DaB193b72db9E9BE9D8ee669B652);
+    IConvexRewards public constant rewardsContract = IConvexRewards(0x9D5C5E364D81DaB193b72db9E9BE9D8ee669B652);
     uint256 public pid = 38; // this is unique to each pool
     bool harvestExtras = true; //If we chould claim extras on harvests
 
     //ChainLink Price Feeds
-    AggregatorV3Interface internal btcPriceFeed = AggregatorV3Interface(0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c);
-    AggregatorV3Interface internal ethPriceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
+    AggregatorV3Interface internal constant btcPriceFeed = AggregatorV3Interface(0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c);
+    AggregatorV3Interface internal constant ethPriceFeed = AggregatorV3Interface(0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419);
 
     //borrow tokens
     address constant weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2);
@@ -745,43 +745,6 @@ contract Caave is BaseStrategy {
         uint256[] memory amounts = router.getAmountsOut(_amount, getTokenOutPath(start, end));
 
         return amounts[amounts.length - 1];
-    }
-
-    function _checkCrvPrice(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public view returns (uint256) {
-        if (_amount == 0) {
-            return 0;
-        }
-        return crvPool.get_dy_underlying(index[_from], index[_to], _amount);
-    }
-
-    function minCrvSwap(uint256 _amount) internal returns(uint256) {
-        return _amount.mul(DENOMINATOR.sub(crvSlippage)).div(DENOMINATOR);
-    }
-
-    function _crvSwapWithAmount(
-        uint256 _from,
-        uint256 _to,
-        uint256 _fromAmount,
-        uint256 _toMin
-    ) internal{
-        crvPool.exchange_underlying(_from, _to, _fromAmount, _toMin);
-    }
-
-    function _crvSwapFrom(
-        uint256 _from,
-        uint256 _to,
-        uint256 _amount
-    ) public{
-         if (_amount == 0) {
-            return;
-        }
-
-        uint256 to = crvPool.get_dy_underlying(_from, _to, _amount);
-        _crvSwapWithAmount(_from, to, _amount, to.mul(DENOMINATOR.sub(slippageProtectionIn)).div(DENOMINATOR));
     }
   
     function _swapFromWithAmount(
